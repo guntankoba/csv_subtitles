@@ -6,12 +6,10 @@ def separate_row(file, delimiter):
     ファイルから句点ごとに変更したリストを返す
     """
     new_file = []
-    first_date = file[1][0] #1行目が項目名の想定
     
     for row_index, row in enumerate(file):
         if(row_index==0):
             continue
-        current_date = row[0]
         # delimiteerごとに文章を分割
         sentences = row[2].split(delimiter)
         sentences_length = len(sentences)
@@ -22,7 +20,7 @@ def separate_row(file, delimiter):
             new_row = [row[0], row[1], new_sentence, row[3]]
             new_file.append(new_row)
         else:
-            for index, sentence in enumerate(sentences):
+            for sentence in sentences:
                 if (sentence == '' or sentence == '"' or sentence==' "'):
                     continue
                 new_sentence = check_quote(sentence) + delimiter

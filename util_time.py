@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
 
-def get_times2(mm, length, word_nums):
+def get_times(mm, length, word_nums):
     percentages = list(map(lambda i:i/sum(word_nums), word_nums))
     time_percentages = list(map(lambda i:i*60, percentages))
     time_percentages = list(map(lambda i:int(Decimal(str(i)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)),time_percentages))
@@ -29,8 +29,7 @@ def get_times2(mm, length, word_nums):
     return times
 
 
-
-def get_next_times2(file):
+def get_next_times(file):
     """推定字幕表示時間を抽出する
     TODO: セグメント内の文字数を算出して、割合とする
     """
@@ -56,7 +55,7 @@ def get_next_times2(file):
             #print(mm)
             check_total += same_minitutes_count
             # 値の算出
-            times = get_times2(mm, same_minitutes_count, same_minitutes_word_num)
+            times = get_times(mm, same_minitutes_count, same_minitutes_word_num)
             #print(times)
             assert (len(times)==same_minitutes_count)
             # 値の更新
@@ -70,7 +69,7 @@ def get_next_times2(file):
         date = current_date - first_date 
         mm = get_h_m_s(date)
         check_total += same_minitutes_count
-        times = get_times2(mm, same_minitutes_count, same_minitutes_word_num)
+        times = get_times(mm, same_minitutes_count, same_minitutes_word_num)
         #print(times)
         #print(new_times[-1], times[-1])
         if new_times[-1] != times[-1]:
@@ -79,7 +78,7 @@ def get_next_times2(file):
     return new_times
 
 
-def get_vtt_times2(new_times):
+def get_vtt_times(new_times):
 
     vtt_times = []
     for i, new in enumerate(new_times):
