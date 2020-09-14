@@ -28,6 +28,7 @@ def separate_row(file, delimiter):
                 new_file.append(new_row)
     return new_file
 
+
 def check_quote(sentence):
     """Meeting Assistの不要な文字列を削除"""
     if sentence[:1] == '"':
