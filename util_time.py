@@ -63,7 +63,7 @@ def get_next_times(file):
         times = get_times(mm, same_minitutes_count, same_minitutes_word_num)
         if new_times[-1] != times[-1]:
             new_times.extend(times)
-    print('total'+ str(check_total))
+
     return new_times
 
 
