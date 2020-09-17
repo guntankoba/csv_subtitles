@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 import csv, datetime
 import glob
 import util_csv
