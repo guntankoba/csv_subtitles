@@ -12,9 +12,7 @@ def get_times2(start_date, check_date, current_date, length, word_nums):
     diff_time = current_date - check_date #差分時間
     diff_seconds = diff_time.seconds # 時間、分含めた総合秒数
     diff_time = int(get_h_m_s(diff_time)[2])
-    check_date_ss = check_date.second # 
-    print(diff_seconds, check_date_ss)
-    
+    check_date_ss = check_date.second 
     # 差分文字数に対する割合を算出
     percentages = list(map(lambda i:i/sum(word_nums), word_nums))
     time_percentages = list(map(lambda i:i*diff_seconds, percentages))
@@ -22,7 +20,6 @@ def get_times2(start_date, check_date, current_date, length, word_nums):
     time_percentages = list(map(lambda i:int(Decimal(str(i)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)),time_percentages))
     if (sum(time_percentages) != diff_seconds):
         time_percentages[-1] = diff_seconds - sum(time_percentages[:-1])
-    print(time_percentages)
     assert sum(time_percentages) == diff_seconds
 
     # [24, 77, 49]
@@ -40,10 +37,7 @@ def get_times2(start_date, check_date, current_date, length, word_nums):
         # check_dateにtotal_timeを足した日付が発話開始時間
         # 開始日付からの経過時間を算出してvtt形式対応する
         td = (check_date + datetime.timedelta(seconds=total_time)) - start_date
-        print(type(td), td)
         hh, mm, ss = get_h_m_s(td)
-        print(hh,mm,ss)
-        print(type(hh), type(mm), type(ss))
         time = hh +':'+ mm +':'+ ss +'.000'
         times.append(time)
 
@@ -82,7 +76,6 @@ def get_next_times(file):
     """推定字幕表示時間を抽出する
     """
     first_date = datetime.datetime.strptime(file[1][0], '%Y/%m/%d %H:%M:%S')
-    print('first_date: ' + str(first_date))
     same_minitutes_count = 0
     same_minitutes_word_num = [] # 同一時間帯の文字数一覧
     check_date = first_date
@@ -106,7 +99,6 @@ def get_next_times(file):
                 check_date = current_date
                 same_minitutes_word_num = [word_num]
             else:
-                print(check_date, current_date, same_minitutes_count)
                 times = get_times2(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
                 assert (len(times)==same_minitutes_count)
                 # 値の更新
@@ -120,8 +112,6 @@ def get_next_times(file):
         if new_times[-1] != times[-1]:
             new_times.extend(times)
 
-    print(len(new_times))
-    print(new_times)
     return new_times
 
 
