@@ -4,16 +4,18 @@ import datetime
 from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
 
 def get_times2(start_date, check_date, current_date, length, word_nums):
+    """
+    重複時間の列の文字数から推定時間を算出および、開始からの経過時間に変更
+
+    """
     # 差分から推定時間をリストにして返却
     diff_time = current_date - check_date #差分時間
-    # TODO : 一度secondsで計算後、mm:ssに戻す
     diff_seconds = diff_time.seconds # 時間、分含めた総合秒数
     diff_time = int(get_h_m_s(diff_time)[2])
     check_date_ss = check_date.second # 
     print(diff_seconds, check_date_ss)
     
-    # args: ex 01:30:00 , 01:30:20, 3
-    # return : [01:30:00, 01:30:05, 01:30:15]
+    # 差分文字数に対する割合を算出
     percentages = list(map(lambda i:i/sum(word_nums), word_nums))
     time_percentages = list(map(lambda i:i*diff_seconds, percentages))
     # 整数への切り上げ
@@ -22,11 +24,9 @@ def get_times2(start_date, check_date, current_date, length, word_nums):
         time_percentages[-1] = diff_seconds - sum(time_percentages[:-1])
     print(time_percentages)
     assert sum(time_percentages) == diff_seconds
-    
-    # total_time = 0
+
     # [24, 77, 49]
     # ーー＞ [00:00:00, 00:00:24, 00:00:101]
-    # 初期値は１つ前の時間（＝check_date)
     total_time = 0
     times = []
     for i, time in enumerate(time_percentages):
@@ -80,8 +80,6 @@ def get_times(mm, length, word_nums):
 
 def get_next_times(file):
     """推定字幕表示時間を抽出する
-    TODO: 仕様変更で秒数が出力されることに、同一SSまでを判断してから
-          その60 - SSを文字数ごとに分割する
     """
     first_date = datetime.datetime.strptime(file[1][0], '%Y/%m/%d %H:%M:%S')
     print('first_date: ' + str(first_date))
@@ -98,15 +96,10 @@ def get_next_times(file):
             same_minitutes_word_num.append(word_num)
         else:
             # 日付変更
-            #date = current_date - first_date - datetime.timedelta(minutes=1)
             date = current_date - first_date # 経過時間
 
-            #print(date)
-            #mm = get_h_m_s(date)
             check_total += same_minitutes_count
             # 値の算出
-            #print(same_minitutes_count)
-            # same_minitutes_count ==1
             if same_minitutes_count == 1:
                 
                 new_times.extend(['0'+str(date)+'.000'])
@@ -114,13 +107,7 @@ def get_next_times(file):
                 same_minitutes_word_num = [word_num]
             else:
                 print(check_date, current_date, same_minitutes_count)
-                # current_date = 次の時間帯
-                # chekck_date = その前の時間
-                #date_diff = current_date - check_date
-                #print(date_diff)
                 times = get_times2(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
-                #times = get_times(mm, same_minitutes_count, same_minitutes_word_num)
-                #print(type(times), times)
                 assert (len(times)==same_minitutes_count)
                 # 値の更新
                 check_date = current_date
@@ -128,11 +115,8 @@ def get_next_times(file):
                 same_minitutes_word_num = [word_num]
                 new_times.extend(times)
     else:
-        #date = current_date - first_date 
-        #mm = get_h_m_s(date)
         check_total += same_minitutes_count
         times = get_times2(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
-        #times = get_times(mm, same_minitutes_count, same_minitutes_word_num)
         if new_times[-1] != times[-1]:
             new_times.extend(times)
 
@@ -149,14 +133,6 @@ def get_vtt_times(new_times):
             vtt_time = new + ' --> ' + next_minitutes
         else:
             vtt_time = new + ' --> ' + new_times[i+1]
-        #     if (i==0):
-        #         vtt_time = '00:00:00.000 --> '+ new
-        #     else:
-        #         try:
-        #             vtt_time = new_times[i-1] + ' --> ' + new
-        #         except:
-        #             #next_minitutes = get_next_minitutes(new)
-        #             vtt_time = new_times[i-1] + ' --> ' + new
         vtt_times.append(vtt_time)
         
     return vtt_times
@@ -170,6 +146,9 @@ def get_next_minitutes(time):
 
 
 def get_h_m_s(td):
+    """
+    datetime.timedelta形式から時間、分、秒を算出する
+    """
     m, s = divmod(td.seconds, 60)
     h, m = divmod(m, 60)
     if len(str(h))==1:
