@@ -100,6 +100,7 @@ def get_next_times(file):
             # 日付変更
             #date = current_date - first_date - datetime.timedelta(minutes=1)
             date = current_date - first_date # 経過時間
+
             #print(date)
             #mm = get_h_m_s(date)
             check_total += same_minitutes_count
@@ -107,7 +108,8 @@ def get_next_times(file):
             #print(same_minitutes_count)
             # same_minitutes_count ==1
             if same_minitutes_count == 1:
-                new_times.extend([str(date)+'.000'])
+                
+                new_times.extend(['0'+str(date)+'.000'])
                 check_date = current_date
                 same_minitutes_word_num = [word_num]
             else:
@@ -140,25 +142,30 @@ def get_next_times(file):
 
 
 def get_vtt_times(new_times):
-
     vtt_times = []
     for i, new in enumerate(new_times):
-        if (i==0):
-            vtt_time = '00:00:00.000 --> '+ new
+        if (i+1 == len(new_times)):
+            next_minitutes = get_next_minitutes(new)
+            vtt_time = new + ' --> ' + next_minitutes
         else:
-            try:
-                vtt_time = new_times[i-1] + ' --> ' + new
-            except:
-                #next_minites = get_next_minites(new)
-                vtt_time = new_times[i-1] + ' --> ' + new
+            vtt_time = new + ' --> ' + new_times[i+1]
+        #     if (i==0):
+        #         vtt_time = '00:00:00.000 --> '+ new
+        #     else:
+        #         try:
+        #             vtt_time = new_times[i-1] + ' --> ' + new
+        #         except:
+        #             #next_minitutes = get_next_minitutes(new)
+        #             vtt_time = new_times[i-1] + ' --> ' + new
         vtt_times.append(vtt_time)
+        
     return vtt_times
 
 
-def get_next_minites(time):
-    current_minites = int(time[3:5])+1
-    next_minites = '0'+str(current_minites) if len(str(current_minites))==1 else str(current_minites)
-    next_time = time[:3] + next_minites + time[5:]
+def get_next_minitutes(time):
+    current_minitutes = int(time[3:5])+1
+    next_minitutes = '0'+str(current_minitutes) if len(str(current_minitutes))==1 else str(current_minitutes)
+    next_time = time[:3] + next_minitutes + ':00.000' #time[5:]
     return next_time
 
 
@@ -174,7 +181,7 @@ def get_h_m_s(td):
         m = '0'+str(m)
     else:
         m = str(m)
-        
+
     if len(str(s))==1:
         s = '0'+str(s)
     else:
