@@ -1,4 +1,5 @@
-# -*- config:utf-8 -*-
+# -*- coding:utf-8 -*-
+
 import csv
 
 def read_csv(file_name):

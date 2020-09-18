@@ -1,4 +1,4 @@
-# -*- config:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 def separate_row(file, delimiter):
     """
@@ -15,17 +15,30 @@ def separate_row(file, delimiter):
         sentences_length = len(sentences)
 
         # 分割した文章数ごとの処理
-        if (sentences_length == 1):
-            new_sentence = check_quote(sentences[0]) + delimiter
-            new_row = [row[0], row[1], new_sentence, row[3]]
-            new_file.append(new_row)
+        if (len(row)==3):
+            if (sentences_length == 1):
+                new_sentence = check_quote(sentences[0]) + delimiter
+                new_row = [row[0], row[1], new_sentence]
+                new_file.append(new_row)
+            else:
+                for sentence in sentences:
+                    if (sentence == '' or sentence == '"' or sentence==' "'):
+                        continue
+                    new_sentence = check_quote(sentence) + delimiter
+                    new_row = [row[0], row[1], new_sentence]
+                    new_file.append(new_row)
         else:
-            for sentence in sentences:
-                if (sentence == '' or sentence == '"' or sentence==' "'):
-                    continue
-                new_sentence = check_quote(sentence) + delimiter
+            if (sentences_length == 1):
+                new_sentence = check_quote(sentences[0]) + delimiter
                 new_row = [row[0], row[1], new_sentence, row[3]]
                 new_file.append(new_row)
+            else:
+                for sentence in sentences:
+                    if (sentence == '' or sentence == '"' or sentence==' "'):
+                        continue
+                    new_sentence = check_quote(sentence) + delimiter
+                    new_row = [row[0], row[1], new_sentence, row[3]]
+                    new_file.append(new_row)
     return new_file
 
 
