@@ -5,6 +5,7 @@ __pycache__/
 
 # data
 data/
+data_sample/
 result/
  
 # C extensions
