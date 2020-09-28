@@ -40,6 +40,11 @@ def get_times(start_date, check_date, current_date, length, word_nums):
         time = hh +':'+ mm +':'+ ss +'.000'
         times.append(time)
 
+    
+    #if (len(times)!=length):
+        #print(times)
+        #print(word_nums)
+    assert(len(times)==length)
     return times
 
 
@@ -69,7 +74,10 @@ def get_next_times(file):
                 new_times.extend(['0'+str(date)+'.000'])
                 check_date = current_date
                 same_minitutes_word_num = [word_num]
-            else:
+            #elif same_minitutes_count == 0:
+
+            else:               
+                #print(same_minitutes_count)
                 times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
                 assert (len(times)==same_minitutes_count)
                 # 値の更新
@@ -82,6 +90,19 @@ def get_next_times(file):
         times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
         if new_times[-1] != times[-1]:
             new_times.extend(times)
+    
+    if(len(file)!=len(new_times)):
+        next_minitutes = current_date.minute + 2
+        if next_minitutes >= 60:
+            next_hours = current_date.hour + 1
+            next_minitutes = next_minitutes - 60
+            str_next_time = str(current_date)[:11] + str(next_hours) + ':' + str(next_minitutes) + ':00'
+        else:
+            str_next_time = str(current_date)[:14] + str(next_minitutes) + ':00'
+
+        current_date = datetime.datetime.strptime(str_next_time, '%Y-%m-%d %H:%M:%S')
+        times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
+        new_times.extend(times)
 
     return new_times
 
