@@ -28,7 +28,12 @@ def main():
 
         # タイムスタンプ形式への更新
         next_times = util_time.get_next_times(separate_file)
+        
+        assert(len(separate_file)==len(next_times))
+        
         vtt_times = util_time.get_vtt_times(next_times)
+        print(len(separate_file), len(vtt_times))
+        #print(vtt_times)
         assert(len(separate_file)==len(vtt_times))
 
         # ファイルの書き込み
