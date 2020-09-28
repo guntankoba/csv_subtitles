@@ -5,6 +5,10 @@ __pycache__/
 
 # data
 data/
+checked_data/
+checked_result/
+vtt_en/
+vtt_jp/
 data_sample/
 result/
  
