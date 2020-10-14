@@ -9,3 +9,9 @@ def read_csv(file_name):
         for row in csv.reader(f):
             file.append(row)
     return file
+
+def write_csv(file_name, rows):
+    with open(file_name, 'w') as o:
+        writer = csv.writer(o, delimiter=',')
+        for row in rows:
+            writer.writerow(row)

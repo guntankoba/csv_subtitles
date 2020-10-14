@@ -18,6 +18,8 @@ def get_times(start_date, check_date, current_date, length, word_nums):
     # 整数への切り上げ
     time_percentages = list(map(lambda i:int(Decimal(str(i)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)),time_percentages))
     if (sum(time_percentages) != diff_seconds):
+        #print(current_date, check_date, time_percentages, diff_seconds)
+        #print(current_date - check_date)
         time_percentages[-1] = diff_seconds - sum(time_percentages[:-1])
     assert sum(time_percentages) == diff_seconds
 
@@ -52,6 +54,7 @@ def get_next_times(file):
     """推定字幕表示時間を抽出する
     """
     first_date = datetime.datetime.strptime(file[1][0], '%Y/%m/%d %H:%M:%S')
+    #print(first_date)
     same_minitutes_count = 0
     same_minitutes_word_num = [] # 同一時間帯の文字数一覧
     check_date = first_date
@@ -65,29 +68,44 @@ def get_next_times(file):
             same_minitutes_word_num.append(word_num)
         else:
             # 日付変更
-            date = current_date - first_date # 経過時間
+            date = check_date - first_date # 経過時間
 
             check_total += same_minitutes_count
             # 値の算出
             if same_minitutes_count == 1:
-                
                 new_times.extend(['0'+str(date)+'.000'])
+                #new_times.extend(['0'+str(date)+'.000'])
                 check_date = current_date
                 same_minitutes_word_num = [word_num]
-            #elif same_minitutes_count == 0:
 
             else:               
                 #print(same_minitutes_count)
                 times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
                 assert (len(times)==same_minitutes_count)
+                try:
+                    assert (has_duplicates(times))
+                except:
+                    print(times, row)
+                    #assert(1==2)
+                # print(times[-1] , current_date)
+                assert (times[-1] != current_date)
                 # 値の更新
                 check_date = current_date
                 same_minitutes_count = 1
                 same_minitutes_word_num = [word_num]
                 new_times.extend(times)
     else:
-        check_total += same_minitutes_count
+        next_minitutes = current_date.minute + 2
+        if next_minitutes >= 60:
+            next_hours = current_date.hour + 1
+            next_minitutes = next_minitutes - 60
+            str_next_time = str(current_date)[:11] + str(next_hours) + ':' + str(next_minitutes) + ':00'
+        else:
+            str_next_time = str(current_date)[:14] + str(next_minitutes) + ':00'
+
+        current_date = datetime.datetime.strptime(str_next_time, '%Y-%m-%d %H:%M:%S')
         times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
+        print(times)
         if new_times[-1] != times[-1]:
             new_times.extend(times)
     
@@ -106,15 +124,19 @@ def get_next_times(file):
 
     return new_times
 
+def has_duplicates(seq):
+    return len(seq) == len(set(seq))
 
 def get_vtt_times(new_times):
     vtt_times = []
-    for i, new in enumerate(new_times):
+    for i, new_time in enumerate(new_times):
         if (i+1 == len(new_times)):
-            next_minitutes = get_next_minitutes(new)
-            vtt_time = new + ' --> ' + next_minitutes
+            next_minitutes = get_next_minitutes(new_time)
+            vtt_time = new_time + ' --> ' + next_minitutes
         else:
-            vtt_time = new + ' --> ' + new_times[i+1]
+            vtt_time = new_time + ' --> ' + new_times[i+1]
+            print(vtt_time, new_times[i+1])
+            #assert(new_time != new_times[i+1])
         vtt_times.append(vtt_time)
         
     return vtt_times
@@ -148,3 +170,44 @@ def get_h_m_s(td):
     else:
         s = str(s)
     return h, m, s
+
+def get_timedelta(time):
+    hours, minutes, seconds = time.split(':')
+    seconds = seconds.split('.')[0]
+    timedelta = datetime.timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds))
+    return timedelta
+
+def add_time(default_time, start_time):
+    """
+    timedelta同士の加算
+    default_time : datetime.timedelta
+    start_time : datetime.timedelta                                          
+    added_time : datetime.timedelta
+    """
+    added_time = default_time + start_time
+    
+    return added_time
+
+def add_start_time(file_name, start_time):
+    """
+    各行の値を加算する
+    
+    return : new_rows
+    
+    """
+    start_timedelta = get_timedelta(start_time)
+    # 予めメモしていた開始推定時間を全秒数に追加する
+    rows = util_csv.read_csv(file_name)
+
+    for row in rows:
+        first_timedelta = get_timedelta(row[0].split(' ')[0])
+        second_timedelta = get_timedelta(row[0].split(' ')[2])
+        # 加算
+        first_time = add_time(first_timedelta, start_timedelta)
+        second_time = add_time(second_timedelta, start_timedelta)
+        
+        new_vtt_time = '0' + str(first_time) + '.000 --> 0' + str(second_time) + '.000'
+        assert(new_vtt_time != row[0])
+        row[0] = new_vtt_time
+        
+    return rows

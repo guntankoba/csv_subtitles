@@ -2,15 +2,22 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.ipynb
 
 # data
 data/
+data_old/
 checked_data/
 checked_result/
+checked_result2/
+cut64_fix/
+
 vtt_en/
 vtt_jp/
 data_sample/
 result/
+remake_result
+remake_data
  
 # C extensions
 *.so

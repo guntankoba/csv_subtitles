@@ -6,6 +6,8 @@ import util_csv
 import util_time
 import editrow
 
+def has_duplicates(seq):
+    return len(seq) == len(set(seq))
 
 def main():
     # データファイル一覧の読み込み
@@ -19,7 +21,6 @@ def main():
         
         # ファイルのread
         file = util_csv.read_csv(file_name)
-
         # ファイルの分割、書き込み
         separate_file = editrow.separate_row(file, '。')
         print('ファイル名： '+ file_name)
@@ -28,12 +29,15 @@ def main():
 
         # タイムスタンプ形式への更新
         next_times = util_time.get_next_times(separate_file)
-        
-        assert(len(separate_file)==len(next_times))
+        print(next_times)
+        try:
+            assert((has_duplicates(next_times)))
+        except:
+            print("got dupulicates!!")
+
+
         
         vtt_times = util_time.get_vtt_times(next_times)
-        print(len(separate_file), len(vtt_times))
-        #print(vtt_times)
         assert(len(separate_file)==len(vtt_times))
 
         # ファイルの書き込み
