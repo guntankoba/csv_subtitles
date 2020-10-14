@@ -3,6 +3,8 @@
 import datetime
 from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
 
+import util_csv
+
 def get_times(start_date, check_date, current_date, length, word_nums):
     """
     重複時間の列の文字数から推定時間を算出および、開始からの経過時間に変更
@@ -18,13 +20,9 @@ def get_times(start_date, check_date, current_date, length, word_nums):
     # 整数への切り上げ
     time_percentages = list(map(lambda i:int(Decimal(str(i)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)),time_percentages))
     if (sum(time_percentages) != diff_seconds):
-        #print(current_date, check_date, time_percentages, diff_seconds)
-        #print(current_date - check_date)
         time_percentages[-1] = diff_seconds - sum(time_percentages[:-1])
     assert sum(time_percentages) == diff_seconds
 
-    # [24, 77, 49]
-    # ーー＞ [00:00:00, 00:00:24, 00:00:101]
     total_time = 0
     times = []
     for i, time in enumerate(time_percentages):
@@ -42,19 +40,15 @@ def get_times(start_date, check_date, current_date, length, word_nums):
         time = hh +':'+ mm +':'+ ss +'.000'
         times.append(time)
 
-    
-    #if (len(times)!=length):
-        #print(times)
-        #print(word_nums)
     assert(len(times)==length)
     return times
 
 
 def get_next_times(file):
-    """推定字幕表示時間を抽出する
+    """
+    推定字幕表示時間を抽出する
     """
     first_date = datetime.datetime.strptime(file[1][0], '%Y/%m/%d %H:%M:%S')
-    #print(first_date)
     same_minitutes_count = 0
     same_minitutes_word_num = [] # 同一時間帯の文字数一覧
     check_date = first_date
@@ -74,20 +68,17 @@ def get_next_times(file):
             # 値の算出
             if same_minitutes_count == 1:
                 new_times.extend(['0'+str(date)+'.000'])
-                #new_times.extend(['0'+str(date)+'.000'])
                 check_date = current_date
                 same_minitutes_word_num = [word_num]
 
             else:               
-                #print(same_minitutes_count)
                 times = get_times(first_date, check_date, current_date, same_minitutes_count, same_minitutes_word_num)
                 assert (len(times)==same_minitutes_count)
                 try:
                     assert (has_duplicates(times))
                 except:
                     print(times, row)
-                    #assert(1==2)
-                # print(times[-1] , current_date)
+
                 assert (times[-1] != current_date)
                 # 値の更新
                 check_date = current_date
@@ -136,7 +127,6 @@ def get_vtt_times(new_times):
         else:
             vtt_time = new_time + ' --> ' + new_times[i+1]
             print(vtt_time, new_times[i+1])
-            #assert(new_time != new_times[i+1])
         vtt_times.append(vtt_time)
         
     return vtt_times
@@ -145,7 +135,7 @@ def get_vtt_times(new_times):
 def get_next_minitutes(time):
     current_minitutes = int(time[3:5])+1
     next_minitutes = '0'+str(current_minitutes) if len(str(current_minitutes))==1 else str(current_minitutes)
-    next_time = time[:3] + next_minitutes + ':00.000' #time[5:]
+    next_time = time[:3] + next_minitutes + ':00.000' 
     return next_time
 
 
@@ -191,7 +181,6 @@ def add_time(default_time, start_time):
 def add_start_time(file_name, start_time):
     """
     各行の値を加算する
-    
     return : new_rows
     
     """
